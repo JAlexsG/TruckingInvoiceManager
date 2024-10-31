@@ -1,3 +1,4 @@
+// src/App.js
 import React, { useState, useEffect } from 'react';
 import InvoiceForm from './components/InvoiceForm';
 import InvoiceTable from './components/InvoiceTable';
@@ -37,10 +38,14 @@ function App() {
         setSelectedInvoice(invoice);
     };
 
+    const handleClear = () => {
+        setSelectedInvoice(null); // Reset selectedInvoice to exit "Update Mode"
+    };
+
     return (
         <div className="App">
             <h1>Invoice Manager</h1>
-            <InvoiceForm onSubmit={handleAddInvoice} initialData={selectedInvoice} />
+            <InvoiceForm onSubmit={handleAddInvoice} initialData={selectedInvoice} onClear={handleClear} />
             <InvoiceTable invoices={invoices} onDelete={handleDeleteInvoice} onEdit={handleEditInvoice} />
         </div>
     );

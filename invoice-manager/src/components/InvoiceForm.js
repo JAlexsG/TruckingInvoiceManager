@@ -2,16 +2,22 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const InvoiceForm = ({ onSubmit, initialData }) => {
+const InvoiceForm = ({ onSubmit, initialData, onClear }) => {
+    // Helper function to get today's date in YYYY-MM-DD format
+    const getTodayDate = () => {
+        const today = new Date();
+        return today.toISOString().split('T')[0];
+    };
+
     const [invoiceData, setInvoiceData] = useState({
         invoiceNumber: '',
         loadNumber: '',
         pickUpAddress: '',
-        pickUpDate: '',
+        pickUpDate: initialData ? '' : getTodayDate(), // Default to today's date if no initial data
         deliveryAddress: '',
-        deliveryDate: '',
+        deliveryDate: initialData ? '' : getTodayDate(), // Default to today's date if no initial data
         rate: '',
-        invoiceDate: '',
+        invoiceDate: initialData ? '' : getTodayDate(), // Default to today's date if no initial data
         companyId: ''
     });
 
@@ -66,13 +72,28 @@ const InvoiceForm = ({ onSubmit, initialData }) => {
             invoiceNumber: '',
             loadNumber: '',
             pickUpAddress: '',
-            pickUpDate: '',
+            pickUpDate: getTodayDate(), // Reset to today's date after submission
             deliveryAddress: '',
-            deliveryDate: '',
+            deliveryDate: getTodayDate(), // Reset to today's date after submission
             rate: '',
-            invoiceDate: '',
+            invoiceDate: getTodayDate(), // Reset to today's date after submission
             companyId: ''
         });
+    };
+
+    const handleClear = () => {
+        setInvoiceData({
+            invoiceNumber: '',
+            loadNumber: '',
+            pickUpAddress: '',
+            pickUpDate: getTodayDate(), // Set to today's date on clear
+            deliveryAddress: '',
+            deliveryDate: getTodayDate(), // Set to today's date on clear
+            rate: '',
+            invoiceDate: getTodayDate(), // Set to today's date on clear
+            companyId: ''
+        });
+        onClear(); // Notify App.js to exit "Update Mode"
     };
 
     return (
@@ -149,6 +170,13 @@ const InvoiceForm = ({ onSubmit, initialData }) => {
             <button type="submit">
                 {initialData ? 'Update Invoice' : 'Create Invoice'}
             </button>
+
+            {/* Clear Button */}
+            {initialData && (
+                <button type="button" onClick={handleClear}>
+                    Clear
+                </button>
+            )}
         </form>
     );
 };
