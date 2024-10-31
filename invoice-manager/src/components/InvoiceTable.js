@@ -1,7 +1,8 @@
 // src/components/InvoiceTable.js
+// src/components/InvoiceTable.js
 import React from 'react';
 
-const InvoiceTable = ({ invoices }) => {
+const InvoiceTable = ({ invoices, onDelete, onEdit }) => {
     return (
         <table>
             <thead>
@@ -15,18 +16,12 @@ const InvoiceTable = ({ invoices }) => {
                     <th>Rate</th>
                     <th>Invoice Date</th>
                     <th>Company Name</th>
-                    <th>Company Address</th>
-                    <th>Company MC Number</th>
-                    <th>Company DOT Number</th>
-                    <th>Company FEIN</th>
-                    <th>Company City</th>
-                    <th>Company State</th>
-                    <th>Company ZIP</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                {invoices.map((invoice, index) => (
-                    <tr key={index}>
+                {invoices.map((invoice) => (
+                    <tr key={invoice.id}>
                         <td>{invoice.invoice_number}</td>
                         <td>{invoice.load_number}</td>
                         <td>{invoice.pick_up_address}</td>
@@ -36,13 +31,10 @@ const InvoiceTable = ({ invoices }) => {
                         <td>{invoice.rate}</td>
                         <td>{invoice.invoice_date}</td>
                         <td>{invoice.company_name}</td>
-                        <td>{invoice.company_address}</td>
-                        <td>{invoice.company_mc_number}</td>
-                        <td>{invoice.company_dot_number}</td>
-                        <td>{invoice.company_fein}</td>
-                        <td>{invoice.company_city}</td>
-                        <td>{invoice.company_state}</td>
-                        <td>{invoice.company_zip}</td>
+                        <td>
+                            <button onClick={() => onEdit(invoice)}>Edit</button>
+                            <button onClick={() => onDelete(invoice.id)}>Delete</button>
+                        </td>
                     </tr>
                 ))}
             </tbody>
@@ -51,3 +43,4 @@ const InvoiceTable = ({ invoices }) => {
 };
 
 export default InvoiceTable;
+

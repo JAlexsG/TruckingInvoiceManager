@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const InvoiceForm = ({ onSubmit }) => {
+const InvoiceForm = ({ onSubmit, initialData }) => {
     const [invoiceData, setInvoiceData] = useState({
         invoiceNumber: '',
         loadNumber: '',
@@ -12,12 +12,36 @@ const InvoiceForm = ({ onSubmit }) => {
         deliveryDate: '',
         rate: '',
         invoiceDate: '',
-        companyId: '' // New field for company selection
+        companyId: ''
     });
 
-    const [companies, setCompanies] = useState([]); // Store companies for dropdown
+    const [companies, setCompanies] = useState([]); // For the company dropdown
 
-    // Fetch companies when the component mounts
+    // Helper function to format date
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toISOString().split('T')[0]; // Returns only the 'YYYY-MM-DD' part
+    };
+
+    // Populate the form with initial data if editing
+    useEffect(() => {
+        if (initialData) {
+            setInvoiceData({
+                invoiceNumber: initialData.invoice_number || '',
+                loadNumber: initialData.load_number || '',
+                pickUpAddress: initialData.pick_up_address || '',
+                pickUpDate: formatDate(initialData.pick_up_date), // Format date
+                deliveryAddress: initialData.delivery_address || '',
+                deliveryDate: formatDate(initialData.delivery_date), // Format date
+                rate: initialData.rate || '',
+                invoiceDate: formatDate(initialData.invoice_date), // Format date
+                companyId: initialData.company_id || ''
+            });
+        }
+    }, [initialData]);
+
+    // Fetch companies for dropdown when component mounts
     useEffect(() => {
         const fetchCompanies = async () => {
             try {
@@ -53,17 +77,67 @@ const InvoiceForm = ({ onSubmit }) => {
 
     return (
         <form onSubmit={handleSubmit}>
-            <input type="text" name="invoiceNumber" placeholder="Invoice Number" value={invoiceData.invoiceNumber} onChange={handleChange} />
-            <input type="text" name="loadNumber" placeholder="Load Number" value={invoiceData.loadNumber} onChange={handleChange} />
-            <input type="text" name="pickUpAddress" placeholder="Pick-Up Address" value={invoiceData.pickUpAddress} onChange={handleChange} />
-            <input type="date" name="pickUpDate" value={invoiceData.pickUpDate} onChange={handleChange} />
-            <input type="text" name="deliveryAddress" placeholder="Delivery Address" value={invoiceData.deliveryAddress} onChange={handleChange} />
-            <input type="date" name="deliveryDate" value={invoiceData.deliveryDate} onChange={handleChange} />
-            <input type="number" name="rate" placeholder="Rate" value={invoiceData.rate} onChange={handleChange} />
-            <input type="date" name="invoiceDate" value={invoiceData.invoiceDate} onChange={handleChange} />
+            <input 
+                type="text" 
+                name="invoiceNumber" 
+                placeholder="Invoice Number" 
+                value={invoiceData.invoiceNumber} 
+                onChange={handleChange} 
+            />
+            <input 
+                type="text" 
+                name="loadNumber" 
+                placeholder="Load Number" 
+                value={invoiceData.loadNumber} 
+                onChange={handleChange} 
+            />
+            <input 
+                type="text" 
+                name="pickUpAddress" 
+                placeholder="Pick-Up Address" 
+                value={invoiceData.pickUpAddress} 
+                onChange={handleChange} 
+            />
+            <input 
+                type="date" 
+                name="pickUpDate" 
+                value={invoiceData.pickUpDate} 
+                onChange={handleChange} 
+            />
+            <input 
+                type="text" 
+                name="deliveryAddress" 
+                placeholder="Delivery Address" 
+                value={invoiceData.deliveryAddress} 
+                onChange={handleChange} 
+            />
+            <input 
+                type="date" 
+                name="deliveryDate" 
+                value={invoiceData.deliveryDate} 
+                onChange={handleChange} 
+            />
+            <input 
+                type="number" 
+                name="rate" 
+                placeholder="Rate" 
+                value={invoiceData.rate} 
+                onChange={handleChange} 
+            />
+            <input 
+                type="date" 
+                name="invoiceDate" 
+                value={invoiceData.invoiceDate} 
+                onChange={handleChange} 
+            />
 
             {/* Company Dropdown */}
-            <select name="companyId" value={invoiceData.companyId} onChange={handleChange} required>
+            <select 
+                name="companyId" 
+                value={invoiceData.companyId} 
+                onChange={handleChange} 
+                required
+            >
                 <option value="">Select a Company</option>
                 {companies.map((company) => (
                     <option key={company.id_company} value={company.id_company}>
@@ -72,7 +146,9 @@ const InvoiceForm = ({ onSubmit }) => {
                 ))}
             </select>
 
-            <button type="submit">Submit</button>
+            <button type="submit">
+                {initialData ? 'Update Invoice' : 'Create Invoice'}
+            </button>
         </form>
     );
 };
