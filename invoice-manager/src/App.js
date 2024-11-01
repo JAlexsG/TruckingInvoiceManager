@@ -6,26 +6,29 @@ import { fetchInvoices, createInvoice, deleteInvoice, updateInvoice } from './se
 
 function App() {
     const [invoices, setInvoices] = useState([]);
-    const [selectedInvoice, setSelectedInvoice] = useState(null); // New state to hold the invoice to be edited
+    const [selectedInvoice, setSelectedInvoice] = useState(null);
 
+    // Load invoices from the backend
     useEffect(() => {
-        const loadInvoices = async () => {
-            const data = await fetchInvoices();
-            setInvoices(data);
-        };
         loadInvoices();
     }, []);
+
+    const loadInvoices = async () => {
+        const data = await fetchInvoices();
+        setInvoices(data);
+    };
 
     const handleAddInvoice = async (invoiceData) => {
         if (selectedInvoice) {
             // Update existing invoice
             const updatedInvoice = await updateInvoice(selectedInvoice.id, invoiceData);
             setInvoices(invoices.map((inv) => (inv.id === updatedInvoice.id ? updatedInvoice : inv)));
-            setSelectedInvoice(null); // Reset after editing
+            setSelectedInvoice(null);
+            return updatedInvoice;
         } else {
-            // Create new invoice
-            const newInvoice = await createInvoice(invoiceData);
-            setInvoices([...invoices, newInvoice]);
+            // Create new invoice and refresh the list
+            await createInvoice(invoiceData);
+            loadInvoices(); // Refresh invoices after creation
         }
     };
 
@@ -39,7 +42,7 @@ function App() {
     };
 
     const handleClear = () => {
-        setSelectedInvoice(null); // Reset selectedInvoice to exit "Update Mode"
+        setSelectedInvoice(null);
     };
 
     return (

@@ -9,45 +9,46 @@ const InvoiceForm = ({ onSubmit, initialData, onClear }) => {
         return today.toISOString().split('T')[0];
     };
 
+    // State for form data, initializing dates with today's date if no initial data
     const [invoiceData, setInvoiceData] = useState({
-        invoiceNumber: '',
+        invoiceNumber: '', // Will display generated number after invoice creation
         loadNumber: '',
         pickUpAddress: '',
-        pickUpDate: initialData ? '' : getTodayDate(), // Default to today's date if no initial data
+        pickUpDate: initialData ? '' : getTodayDate(),
         deliveryAddress: '',
-        deliveryDate: initialData ? '' : getTodayDate(), // Default to today's date if no initial data
+        deliveryDate: initialData ? '' : getTodayDate(),
         rate: '',
-        invoiceDate: initialData ? '' : getTodayDate(), // Default to today's date if no initial data
+        invoiceDate: getTodayDate(), // Automatically set to today's date
         companyId: ''
     });
 
-    const [companies, setCompanies] = useState([]); // For the company dropdown
+    const [companies, setCompanies] = useState([]);
 
-    // Helper function to format date
+    // Helper function to format a date
     const formatDate = (dateString) => {
         if (!dateString) return '';
         const date = new Date(dateString);
-        return date.toISOString().split('T')[0]; // Returns only the 'YYYY-MM-DD' part
+        return date.toISOString().split('T')[0];
     };
 
-    // Populate the form with initial data if editing
+    // Populate form fields with initial data if editing
     useEffect(() => {
         if (initialData) {
             setInvoiceData({
                 invoiceNumber: initialData.invoice_number || '',
                 loadNumber: initialData.load_number || '',
                 pickUpAddress: initialData.pick_up_address || '',
-                pickUpDate: formatDate(initialData.pick_up_date), // Format date
+                pickUpDate: formatDate(initialData.pick_up_date),
                 deliveryAddress: initialData.delivery_address || '',
-                deliveryDate: formatDate(initialData.delivery_date), // Format date
+                deliveryDate: formatDate(initialData.delivery_date),
                 rate: initialData.rate || '',
-                invoiceDate: formatDate(initialData.invoice_date), // Format date
+                invoiceDate: initialData.invoice_date ? formatDate(initialData.invoice_date) : getTodayDate(),
                 companyId: initialData.company_id || ''
             });
         }
     }, [initialData]);
 
-    // Fetch companies for dropdown when component mounts
+    // Fetch companies for the dropdown
     useEffect(() => {
         const fetchCompanies = async () => {
             try {
@@ -60,51 +61,56 @@ const InvoiceForm = ({ onSubmit, initialData, onClear }) => {
         fetchCompanies();
     }, []);
 
+    // Handle changes in form fields
     const handleChange = (e) => {
         const { name, value } = e.target;
         setInvoiceData({ ...invoiceData, [name]: value });
     };
 
-    const handleSubmit = (e) => {
+    // Handle form submission
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        onSubmit(invoiceData);
+        const generatedInvoice = await onSubmit({ ...invoiceData, invoiceDate: getTodayDate() }); // Set invoiceDate to today's date
+
+        // Check if generatedInvoice exists and has invoice_number
         setInvoiceData({
-            invoiceNumber: '',
+            invoiceNumber: generatedInvoice?.invoice_number || '', // Display generated invoice number
             loadNumber: '',
             pickUpAddress: '',
-            pickUpDate: getTodayDate(), // Reset to today's date after submission
+            pickUpDate: getTodayDate(),
             deliveryAddress: '',
-            deliveryDate: getTodayDate(), // Reset to today's date after submission
+            deliveryDate: getTodayDate(),
             rate: '',
-            invoiceDate: getTodayDate(), // Reset to today's date after submission
+            invoiceDate: getTodayDate(), // Reset invoice date to today's date
             companyId: ''
         });
     };
 
+    // Handle clearing the form and resetting to Create Mode
     const handleClear = () => {
         setInvoiceData({
             invoiceNumber: '',
             loadNumber: '',
             pickUpAddress: '',
-            pickUpDate: getTodayDate(), // Set to today's date on clear
+            pickUpDate: getTodayDate(),
             deliveryAddress: '',
-            deliveryDate: getTodayDate(), // Set to today's date on clear
+            deliveryDate: getTodayDate(),
             rate: '',
-            invoiceDate: getTodayDate(), // Set to today's date on clear
+            invoiceDate: getTodayDate(), // Reset invoice date to today's date
             companyId: ''
         });
-        onClear(); // Notify App.js to exit "Update Mode"
+        onClear(); // Notify App.js to exit Update Mode
     };
 
     return (
         <form onSubmit={handleSubmit}>
-            <input 
-                type="text" 
-                name="invoiceNumber" 
-                placeholder="Invoice Number" 
-                value={invoiceData.invoiceNumber} 
-                onChange={handleChange} 
-            />
+            {/* Display generated invoice number if available */}
+            {invoiceData.invoiceNumber && (
+                <div>
+                    <strong>Invoice Number: {invoiceData.invoiceNumber}</strong>
+                </div>
+            )}
+            
             <input 
                 type="text" 
                 name="loadNumber" 
@@ -143,12 +149,6 @@ const InvoiceForm = ({ onSubmit, initialData, onClear }) => {
                 name="rate" 
                 placeholder="Rate" 
                 value={invoiceData.rate} 
-                onChange={handleChange} 
-            />
-            <input 
-                type="date" 
-                name="invoiceDate" 
-                value={invoiceData.invoiceDate} 
                 onChange={handleChange} 
             />
 

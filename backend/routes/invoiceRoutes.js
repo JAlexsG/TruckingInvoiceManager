@@ -37,20 +37,32 @@ router.get('/companies', async (req, res) => {
 // ================================================================
 // Updated Route: Create a new invoice with `company_id` reference
 // ================================================================
+// backend/routes/invoiceRoutes.js
 router.post('/invoices', async (req, res) => {
-    const { invoiceNumber, loadNumber, pickUpAddress, pickUpDate, deliveryAddress, deliveryDate, rate, invoiceDate, companyId } = req.body;
+    const { loadNumber, pickUpAddress, pickUpDate, deliveryAddress, deliveryDate, rate, invoiceDate, companyId } = req.body;
+
     try {
+        // Query to get the last invoice number
+        const lastInvoice = await pool.query('SELECT invoice_number FROM invoices ORDER BY id DESC LIMIT 1');
+        let newInvoiceNumber = 4000; // Start invoice numbering from 4000
+
+        if (lastInvoice.rows.length > 0) {
+            newInvoiceNumber = parseInt(lastInvoice.rows[0].invoice_number) + 1; // Increment the last invoice number by 1
+        }
+
         const result = await pool.query(
             `INSERT INTO invoices (invoice_number, load_number, pick_up_address, pick_up_date, delivery_address, delivery_date, rate, invoice_date, company_id)
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
-            [invoiceNumber, loadNumber, pickUpAddress, pickUpDate, deliveryAddress, deliveryDate, rate, invoiceDate, companyId]
+            [newInvoiceNumber, loadNumber, pickUpAddress, pickUpDate, deliveryAddress, deliveryDate, rate, invoiceDate, companyId]
         );
-        res.json(result.rows[0]);
+        
+        res.json(result.rows[0]); // Send back the entire invoice, including the generated invoice number
     } catch (error) {
         console.error("Error creating invoice:", error.message);
         res.status(500).json({ message: 'Error creating invoice' });
     }
 });
+
 
 // ============================================================================
 // Updated Route: Retrieve all invoices with joined company information
