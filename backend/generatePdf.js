@@ -16,22 +16,30 @@ const generateInvoicePdf = (invoiceData, companyData) => {
         doc.pipe(writeStream);
 
         // Add content to the PDF
-        doc.fontSize(20).text('Invoice', { align: 'center' });
-        doc.fontSize(12).text(`Invoice No: ${invoiceData.invoice_number}`, { align: 'right' });
-        doc.moveDown();
+        doc.fontSize(20).text(`Invoice No: ${invoiceData.invoice_number}`, { align: 'right' });//Invoice number to the right
+        doc.fontSize(12).text(`Invoice Date: ${new Date(invoiceData.invoice_date).toLocaleDateString()}`, { align: 'right' });//Bellow invoice date
         doc.fontSize(14).text(companyData.company_name);
-        doc.fontSize(12).text(`${companyData.company_address}`);
-        doc.text(`${companyData.company_city}, ${companyData.company_state} ${companyData.company_zip}`);
+        doc.fontSize(14).text(`${companyData.company_address}`);
+        doc.fontSize(14).text(`${companyData.company_city}, ${companyData.company_state} ${companyData.company_zip}`);
+        doc.moveTo(100,100);
+        doc.lineTo(100,100);
+        doc.stroke();
         doc.moveDown();
-        doc.text(`Load#: ${invoiceData.load_number}`);
-        doc.text(`Pick-Up Address: ${invoiceData.pick_up_address}`);
-        doc.text(`Pick-Up Date: ${new Date(invoiceData.pick_up_date).toLocaleDateString()}`);
+        doc.fontSize(14).text(`Load#: ${invoiceData.load_number}`,{align:'center'});//Centered Load Number
         doc.moveDown();
-        doc.text(`Delivery Address: ${invoiceData.delivery_address}`);
-        doc.text(`Delivery Date: ${new Date(invoiceData.delivery_date).toLocaleDateString()}`);
         doc.moveDown();
-        doc.text(`Rate: $${invoiceData.rate}`, { align: 'left' });
-        doc.text(`Invoice Date: ${new Date(invoiceData.invoice_date).toLocaleDateString()}`, { align: 'right' });
+        doc.moveDown();
+        doc.fontSize(14).text(`Pick-Up Address: ${invoiceData.pick_up_address}`);
+        doc.fontSize(14).text(`Pick-Up Date: ${new Date(invoiceData.pick_up_date).toLocaleDateString()}`);
+        doc.moveDown();
+        doc.moveDown();
+        doc.moveDown();
+        doc.fontSize(14).text(`Delivery Address: ${invoiceData.delivery_address}`);
+        doc.fontSize(14).text(`Delivery Date: ${new Date(invoiceData.delivery_date).toLocaleDateString()}`);
+        doc.moveDown();
+        doc.moveDown();
+        doc.fontSize(14).text(`Rate: $${invoiceData.rate}`, { align: 'left' });
+        
 
         // Finalize the PDF
         doc.end();
