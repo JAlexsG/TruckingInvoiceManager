@@ -1,13 +1,17 @@
 // backend/routes/invoiceRoutes.js
 const express = require('express');
 const router = express.Router();
-const { Pool } = require('pg');
+const pool = require('../db'); //External db connection line
+const generateInvoicePdf = require('../generatePdf');
+
+/*const { Pool } = require('pg');
 require('dotenv').config({ path: 'backend/.env' });
+
 console.log("Current working directory:", process.cwd());
 
 
 // Log the environment variables to verify they are being loaded correctly
-console.log("Database user:", process.env.DB_USER);
+ console.log("Database user:", process.env.DB_USER);
 console.log("Database password:", process.env.DB_PASSWORD ? "****" : "Not set");
 console.log("Database host:", process.env.DB_HOST);
 console.log("Database port:", process.env.DB_PORT);
@@ -19,7 +23,8 @@ const pool = new Pool({
     database: process.env.DB_DATABASE,
     password: process.env.DB_PASSWORD,
     port: process.env.DB_PORT,
-});
+});*/
+
 
 // ======================================================================
 // New Route: Fetch all companies (for company dropdown in frontend form)
@@ -118,6 +123,32 @@ router.put('/invoices/:id', async (req, res) => {
     } catch (error) {
         console.error("Error updating invoice:", error.message);
         res.status(500).json({ message: 'Error updating invoice' });
+    }
+});
+
+// ============================================================================
+// Route: Generates PDF files for the invoices
+// ============================================================================
+
+router.get('/invoices/:id/pdf', async (req, res) => {
+    try {
+        const invoiceId = req.params.id;
+
+        // Fetch invoice and company data from the database
+        const invoiceResult = await pool.query('SELECT * FROM invoices WHERE invoice_number = $1', [invoiceId]);
+        const invoiceData = invoiceResult.rows[0];
+
+        const companyResult = await pool.query('SELECT * FROM company WHERE id_company = $1', [invoiceData.company_id]);
+        const companyData = companyResult.rows[0];
+
+        // Generate PDF and wait until it's finished
+        const pdfPath = await generateInvoicePdf(invoiceData, companyData);
+
+        // Send the file once generation is complete
+        res.download(pdfPath, `invoice_${invoiceData.invoice_number}.pdf`);
+    } catch (error) {
+        console.error('Error generating PDF:', error);
+        res.status(500).json({ message: 'Error generating PDF' });
     }
 });
 

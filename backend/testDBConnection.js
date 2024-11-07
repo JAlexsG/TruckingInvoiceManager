@@ -1,7 +1,6 @@
 // backend/testDbConnection.js
-const { Pool } = require('pg');
+/*const { Pool } = require('pg');
 require('dotenv').config({ path: 'backend/.env' }); // Specify the path to .env
-
 // Log the current working directory to confirm where the script is running from
 console.log("Current working directory:", process.cwd());
 
@@ -18,9 +17,11 @@ const pool = new Pool({
     database: process.env.DB_DATABASE,
     password: process.env.DB_PASSWORD,
     port: process.env.DB_PORT,
-});
+});*/
 
-pool.connect()
+console.log("We are at: ", process.cwd());
+const pool = require('./db');
+pool.connect()    
     .then(() => {
         console.log("Connected to the database successfully!");
         pool.end();
